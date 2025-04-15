@@ -1,0 +1,19 @@
+{
+    "folders":
+    [
+        {
+            "path": "src/..",
+            "file_exclude_patterns": ["*.sublime-project"]
+        }
+    ],
+
+    "build_systems":
+    [
+        {
+            "name": "game",
+            "working_dir": "${project_path}",
+            "cmd":"start cmd /k python \"${project_path}/src/main.py\"",
+            "shell": true
+        }
+    ]
+}
