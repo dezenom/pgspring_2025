@@ -89,7 +89,7 @@ class Button:
         self.width = size[0]
 
         self.clicked = False
-        self.button_text = text_renderer(size = text_size)
+        self.button_text = TextRenderer(size = text_size)
 
     def clicking(self):
         self.clicked = False

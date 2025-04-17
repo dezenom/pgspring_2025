@@ -2,7 +2,7 @@ import pygame,sys
 import threading
 from time import sleep
 
-sys.path.append("tools")
+sys.path.append("src/tools")
 pygame.init()
 
 import inputs
