@@ -1,96 +1,55 @@
-import pygame,sys
-import threading
-from time import sleep
-
-sys.path.append("src/tools")
-pygame.init()
-
-import inputs
-import umath
-import globals
-
-maxspeed = 5
-speed = [0,0]
-acceleration = 0.4
-friction = 0.5
-
-################# startup for projects #####################
-
-class app():
-    def __init__(self,screen_dimensions=globals.SCREENDIMENSIONS):
-        self.window = pygame.display.set_mode(screen_dimensions,flags=pygame.SCALED)
-        self.clock = pygame.time.Clock()
-        self.running = True
-        self.change_scene = False
-        self.rect = pygame.FRect(320,160,8,8)
-
-        self.load = pygame.Surface((32,32))
-        self.load.fill("red")
-        self.load.set_colorkey((0,0,0))
-        self.angle = 0
+import pygame
+import utils.ut as ut
+import app as pp
 
 
-        inputs.addKeybind("up",pygame.K_w)
-        inputs.addKeybind("down",pygame.K_s)
-        inputs.addKeybind("left",pygame.K_a)
-        inputs.addKeybind("right",pygame.K_d)
-        inputs.addKeybind("quit",pygame.K_ESCAPE)
+app = pp.App()
+rect = app.window.get_rect()
+
+def desc():
+    text = ut.ts.TextRenderer(30)
+    while app.running:
+        app.events()
+        app.window.fill((10,30,30))
+        text.render_text(app.window,"press esc to leave",(30,30),topleft =True)
+        if ut.inputs.checkKeyPress("quit"):
+            break
 
 
+        text.render_text(app.window,"LMB - picking objects",(80,70),topleft =True)
+        text.render_text(app.window,"RMB - dropping objects",(80,100),topleft =True)
+        text.render_text(app.window,"address is read from leftmost runecatch ",(80,130),topleft =True)
+        text.render_text(app.window,"to rightmost runecatch",(80,150),topleft =True)
 
-    def render(self):
-        if not self.change_scene:
-            self.window.fill("cyan")
-            pygame.draw.rect(self.window,"red",self.rect,2)
-        else:
-            self.angle+=1
-            image = pygame.transform.rotate(self.load,self.angle)
-            self.window.fill((50,50,46))
-            self.window.blit(image,(320-16,160-16))
+        pygame.draw.rect(app.window,(0,0,0),rect,20)
         pygame.display.flip()
 
-    def update(self):
-        while True:
-            global maxspeed,speed,acceleration,friction
+def main():
+    ut.inputs.addKeybind("play",pygame.K_RETURN)
 
-            direction = inputs.getDirection("up","down","left","right")
-            if direction[0]:
-                speed[0] = umath.moveTowards(speed[0],acceleration,maxspeed*direction[0])
-            else:speed[0] = umath.moveTowards(speed[0],friction,0)
-            if direction[1]:
-                speed[1] = umath.moveTowards(speed[1],acceleration,maxspeed*direction[1])
-            else:speed[1] = umath.moveTowards(speed[1],friction,0)
-            self.rect.x += speed[0]
-            self.rect.y += speed[1]
-            if inputs.checkKeyPress(pygame.K_q):
-                self.change_scene = True
-                self.rect.center = (320,160)
-                sleep(2)
-                self.change_scene = False
+    buttons = [ut.ts.Button((260,60),size = (120,40),color = (70,60,50),text = "play",shadow_range = 30),ut.ts.Button((260,130),size = (120,40),color = (70,60,50),text = "controls",shadow_range = 30),ut.ts.Button((260,200),size = (120,40),color = (70,60,50),text = "quit",shadow_range = 30),]
 
-            if inputs.checkKeyPress("quit"):
-                self.running = False
-            self.clock.tick(60)
+    do = {
+        "play":app.start,"controls":desc,"quit":app.stop
+    }
+
+    while app.running:
+        app.window.fill((10,30,30))
+        app.events()
+        if ut.inputs.checkKeyPress("play"):
+            app.playing = True
+        for button in buttons:
+            button.clicking()
+            button.render(app.window)
+
+            if button.clicked:
+                do[button.text]()
+
+        app.run()
+
+        pygame.draw.rect(app.window,(0,0,0),rect,20)
+        pygame.display.flip()
+    pygame.quit()
 
 
-    def saveLoad(self):
-        pass
-
-    def run(self):
-        update = threading.Thread(target=self.update,daemon=True)
-        update.start()
-        while self.running:
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    self.running = False
-                if event.type == pygame.KEYDOWN:
-                    inputs.keyboard[str(event.key)] = True
-                if event.type == pygame.KEYUP:
-                    inputs.keyboard[str(event.key)] = False
-            self.render()
-            self.clock.tick(60)
-        pygame.quit()
-
-if __name__ == "__main__":
-    game=app()
-    game.run()
+main()
