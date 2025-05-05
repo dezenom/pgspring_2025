@@ -39,34 +39,41 @@ class App():
 
 
     def render(self):
-        self.window.fill((100,100,100))
+        if self.life > 0:
+            self.window.fill((100,100,100))
 
-        self.teleporter.render(self.window)
-        for node in self.nodes:
-            node.render(self.window)
-        self.wave_controller.render(self.window)
+            self.teleporter.render(self.window)
+            for node in self.nodes:
+                node.render(self.window)
+            self.wave_controller.render(self.window)
 
-        self.hbar.render(self.window,self.life,[10,15])
-        self.text.render_text(self.window,str(int(self.points)),(ut.globals.SCREENDIMENSIONS[0] - 100,20),color = (200,200,200))
-        self.text.render_text(self.window,"space to skip",(ut.globals.SCREENDIMENSIONS[0]/2,ut.globals.SCREENDIMENSIONS[1]-20),color = (200,200,200))
+            self.hbar.render(self.window,self.life,[10,15])
+            self.text.render_text(self.window,str(int(self.points)),(ut.globals.SCREENDIMENSIONS[0] - 100,20),color = (200,200,200))
+            self.text.render_text(self.window,"space to skip",(ut.globals.SCREENDIMENSIONS[0]/2,ut.globals.SCREENDIMENSIONS[1]-20),color = (200,200,200))
+        else:
+            self.window.fill((50,50,50))
+            self.text.render_text(self.window,f"high-score---{self.points}",(ut.globals.SCREENDIMENSIONS[0]/2,ut.globals.SCREENDIMENSIONS[1]/2))
+
 
         pygame.display.flip()
 
     def update(self):
-        self.wave_controller.update()
+
+        if self.life > 0:
+            self.wave_controller.update()
+            for node in self.nodes:
+                node.update()
+            for obj in self.pathers:
+                if self.active:
+                    obj.clicked = False
+                if obj.clicked:
+                    self.active = True
+            self.active = False
+
+            self.teleporter.update()
 
         if ut.inputs.checkKeyPress("quit"):
             self.playing = False
-        for node in self.nodes:
-            node.update()
-        for obj in self.pathers:
-            if self.active:
-                obj.clicked = False
-            if obj.clicked:
-                self.active = True
-        self.active = False
-
-        self.teleporter.update()
 
         self.clock.tick(60)
 
